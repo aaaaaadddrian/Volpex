@@ -1,14 +1,23 @@
+using System;
 using UnityEngine;
 
 public class HexGrid : MonoBehaviour
 {
+    public static HexGrid instance;
     public GameObject hexPrefab;
 
     public int height = 11;
     public int width = 11;
 
     public float hexSize = 1f;
-    
+
+    public HexTile[,] tiles;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
     void Start()
     {
         GenerateGrid();
@@ -16,6 +25,8 @@ public class HexGrid : MonoBehaviour
 
     void GenerateGrid()
     {
+        tiles = new HexTile[width, height];
+        
         for (int q = 0; q < width; q++)
         {
             for (int r = 0; r < height; r++)
@@ -32,8 +43,20 @@ public class HexGrid : MonoBehaviour
 
                 hex.q = q;
                 hex.r = r;
+
+                tiles[q, r] = hex;
             }
         }
+    }
+
+    public HexTile getHexTile(int q, int r)
+    {
+        if (q < 0 || q >= width || r < 0 || r >= height)
+        {
+            return null;
+        }
+        
+        return tiles[q, r];
     }
 
 

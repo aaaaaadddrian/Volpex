@@ -30,6 +30,10 @@ public class HexTile : MonoBehaviour
 
     public void OnMouseDown()
     {
+        if (GameManager.instance.gameOver)
+        {
+            return;
+        }
         
         if (owner != -1)
         {
@@ -39,6 +43,12 @@ public class HexTile : MonoBehaviour
         int player = GameManager.instance.currentPlayer;
     
         setOwner(player);
+
+        if (WinChecker.instance.checkWin(player))
+        {
+            GameManager.instance.declareWinner(player);
+            return;
+        }
         
         GameManager.instance.endTurn();
     }

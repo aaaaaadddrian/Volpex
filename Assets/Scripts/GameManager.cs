@@ -26,7 +26,8 @@ public class GameManager : MonoBehaviour
     public void declareWinner(int player)
     {
         gameOver = true;
-        Debug.Log((player == 0 ? "Blue" : "Red") + " wins!");
+        
+        UIBehavior.instance.showWinner(player);
     }
     
 }

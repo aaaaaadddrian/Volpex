@@ -11,6 +11,7 @@ public class UIBehavior : MonoBehaviour
 
     void Awake()
     {
+        if (instance != null && instance != this) { Destroy(gameObject); return; }
         instance = this;
         winnerPanel.SetActive(false);
     }
@@ -22,21 +23,22 @@ public class UIBehavior : MonoBehaviour
         if (player == 0)
         {
             winnerText.text = "BLUE WINS";
-            winnerText.color = Color.blue;
+            winnerText.color = new Color(0.2f, 0.6f, 1f);
         }
         else
         {
-            winnerText.text = "RED WINS!";
-            winnerText.color = Color.red;
+            winnerText.text = "RED WINS";
+            winnerText.color = new Color(1f, 0.3f, 0.3f);
         }
     }
 
-    public void playAgain()
+    public void PlayAgain()
     {
+        // Reload the gameplay scene fresh
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void mainMenu()
+    public void MainMenu()
     {
         SceneManager.LoadScene("SampleScene");
     }

@@ -8,130 +8,61 @@ public class WinChecker : MonoBehaviour
 
     void Awake()
     {
-        instance = this;
+         if (instance != null && instance != this) { Destroy(gameObject); return; }
+         instance = this;
     }
 
-    public bool checkWin(int player)
-    {
-        if (player == 1)
+    public bool CheckWin(int player)
         {
-            return checkRedWin();
-        }
-
-        if (player == 0)
-        {
-            return checkBlueWin();
-        }
-
-        return false;
-    }
-
-    bool checkRedWin()
-    {
-        HashSet<HexTile> visited = new HashSet<HexTile>();
-        Stack<HexTile> stack = new Stack<HexTile>();
-
-        for (int r = 0; r < HexGrid.instance.height; r++)
-        {
-            HexTile tile = HexGrid.instance.getHexTile(0, r);
-
-            if (tile != null && tile.owner == 1)
+            var grid = HexGrid.instance;
+            var stack = new Stack<HexTile>();
+            var visited = new HashSet<HexTile>();
+    
+            
+            for (int q = 0; q < grid.width; q++)
+            for (int r = 0; r < grid.height; r++)
             {
-                stack.Push(tile);
-                visited.Add(tile);
+                HexTile tile = grid.getHexTile(q, r);
+                if (tile == null || tile.owner != player) continue;
+    
+                bool onStartEdge = (player == 1) ? (q == 0) : (r == 0);
+                if (onStartEdge) stack.Push(tile);
             }
-        }
-
-        while (stack.Count > 0)
-        {
-            HexTile current = stack.Pop();
-
-            if (current.q == HexGrid.instance.width - 1)
+    
+            while (stack.Count > 0)
             {
-                return true;
-            }
-
-            foreach (HexTile neighbor in getNeighbors(current))
-            {
-                if (neighbor != null && neighbor.owner == 1 && !visited.Contains(neighbor))
+                HexTile current = stack.Pop();
+                if (!visited.Add(current)) continue;
+    
+                bool onGoalEdge = (player == 1)
+                    ? (current.q == grid.width - 1)
+                    : (current.r == grid.height - 1);
+    
+                if (onGoalEdge) return true;
+    
+                foreach (HexTile neighbor in GetNeighbors(current))
                 {
-                    visited.Add(neighbor);
-                    stack.Push(neighbor);
+                    if (neighbor.owner == player && !visited.Contains(neighbor))
+                        stack.Push(neighbor);
                 }
             }
+            return false;
         }
-
-        return false;
-    }
-
-    bool checkBlueWin()
-    {
-        HashSet<HexTile> visited = new HashSet<HexTile>();
-        Stack<HexTile> stack = new Stack<HexTile>();
-
-        for (int q = 0; q < HexGrid.instance.width; q++)
-        {
-            HexTile tile = HexGrid.instance.getHexTile(q, 0);
-
-            if (tile != null && tile.owner == 0)
-            {
-                stack.Push(tile);
-                visited.Add(tile);
-            }
-        }
-
-        while (stack.Count > 0)
-        {
-            HexTile current = stack.Pop();
-
-            if (current.r == HexGrid.instance.height - 1)
-            {
-                return true;
-            }
-
-            foreach (HexTile neighbor in getNeighbors(current))
-            {
-                if (neighbor != null && neighbor.owner == 0 && !visited.Contains(neighbor))
-                {
-                    visited.Add(neighbor);
-                    stack.Push(neighbor);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    List<HexTile> getNeighbors(HexTile tile)
-    {
-        List<HexTile> neighbors = new List<HexTile>();
-
-        int q = tile.q;
-        int r = tile.r;
-
-        bool isEvenRow = (r % 2 == 0);
-
-        if (isEvenRow)
-        {
-
-            neighbors.Add(HexGrid.instance.getHexTile(q - 1, r)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q + 1, r)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q - 1, r - 1)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q, r - 1)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q - 1, r + 1));
-            neighbors.Add(HexGrid.instance.getHexTile(q, r + 1)); 
-        }
-        else
-        {
-            neighbors.Add(HexGrid.instance.getHexTile(q - 1, r)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q + 1, r)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q, r - 1)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q + 1, r - 1));
-            neighbors.Add(HexGrid.instance.getHexTile(q, r + 1)); 
-            neighbors.Add(HexGrid.instance.getHexTile(q + 1, r + 1));
-        }
+    
         
-        return neighbors;
-    }
+        internal List<HexTile> GetNeighbors(HexTile tile)
+        {
+            var neighbors = new List<HexTile>(6);
+            int q = tile.q, r = tile.r;
+            var grid = HexGrid.instance;
+    
+            (int dq, int dr)[] dirs = { (1,0),(-1,0),(0,1),(0,-1),(1,-1),(-1,1) };
+            foreach (var (dq, dr) in dirs)
+            {
+                HexTile n = grid.getHexTile(q + dq, r + dr);
+                if (n != null) neighbors.Add(n);   // null-guarded
+            }
+            return neighbors;
+        }
 }
 
